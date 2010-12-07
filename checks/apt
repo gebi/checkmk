@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+#
+# Check_MK APT Plugin - Check for upgradeable packages.
+#
+# Copyright 2010, Stefan Schlesinger <sts@ono.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+def inventory_apt_upgrades(checkname, info):
+    if len(info) >= 1:
+        return [(None, "", None)]
+
+    return []
+
+def check_apt_upgrades(item, params, info):
+
+    level   = 0 # 0:OK, 1:WARNING 2:CRITICAL, 3: UNKNOWN
+    updates = []
+
+    for line in info:
+
+	# if we don't have any upgrades listed, the line list
+	# will only contain one element, eg. "upgrades\n"
+	if len(line) < 2:
+	    continue
+
+	# there are upgrades availiable, evaluate the importency.
+	# secupgrades return CRITICAL, normal upgrades only WARNING.
+        type = line[0]
+        pkgs = line[1].strip("\"").split(",")
+
+        if len(pkgs) > 0:
+            if level < 2 and type == "secupgrades":
+                level = 2
+
+            if level < 1 and type == "upgrades":
+                level = 1
+
+            updates.extend(pkgs)
+
+    # Construct a the status message.
+    if level == 0:
+        msg = "OK - All packages are up to date."
+    elif level == 1:
+        msg = "%s packages available for upgrade: %s" % (len(updates), ",".join(updates))
+    elif level == 2:
+        msg = "%s packages available for upgrade: %s" % (len(updates), ",".join(updates))
+
+    return (level, msg)
+
+# declare the check to Check_MK. Dict format:
+#  ( check_function, "service name", perf_data_provided?(0:1), inventory_function)
+check_info['apt.upgrades'] = \
+      (check_apt_upgrades, "apt.upgrades", 0, inventory_apt_upgrades)

@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+#
+# Check_MK APT Plugin - Check for upgradeable packages.
+#
+# Copyright 2010, Stefan Schlesinger <sts@ono.at>
+#
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+import sys
+import os
+import datetime
+import warnings
+warnings.filterwarnings("ignore")
+
+from pprint import pprint
+
+try:
+    import apt
+except ImportError:
+    sys.exit
+
+
+class AptCache(apt.Cache):
+
+    # apt-cache update interval in seconds
+    update_interval = 3600
+
+    # file to check against
+    update_last_file = "/var/cache/apt/pkgcache.bin"
+
+    def __init__(self):
+        apt.Cache.__init__(self)
+        self.update_cache()
+
+    # automatically update the apt cache once a hour
+    def update_cache(self):
+        delta = self.last_cache_update(self.update_last_file)
+        if delta and delta.seconds > self.update_interval:
+            self.update()
+            self.open(None)
+
+    def last_cache_update(self, file):
+        # if the file to check against doesn't exist, return
+        if not os.path.isfile(file):
+            return False
+
+        now     = datetime.datetime.now()
+        mtime   = datetime.datetime.fromtimestamp(os.path.getmtime(file))
+        delta   = now - mtime
+
+        return delta
+
+
+def get_upgradeable():
+    pkgs_to_upgrade     = []
+    pkgs_to_sec_upgrade = []
+    cache = AptCache()
+
+    for pkg in cache:
+        #if pkg.is_upgradable:
+        if pkg.isUpgradable:
+            name      = pkg.name
+            candidate = pkg.candidateOrigin[0]
+            if candidate.label == "Debian-Security":
+                pkgs_to_sec_upgrade.append(name)
+            else:
+                pkgs_to_upgrade.append(name)
+            #candidate = pkg.candidate
+            #print candidate.origins
+            #pkgs_to_upgrade.append(pkg.name.rstrip("\n"))
+
+    return [pkgs_to_upgrade, pkgs_to_sec_upgrade]
+
+
+
+def main():
+    upgrades, secupgrades = get_upgradeable()
+
+    # print the beginning of the plugin header
+    print "<<<apt>>>"
+
+    if len(upgrades) > 0:
+        print "upgrades \"%s\"" % ",".join(upgrades)
+    else:
+        print "upgrades"
+
+    if len(secupgrades) > 0:
+        print "secupgrades \"%s\"" % ",".join(secupgrades)
+    else:
+        print "secupgrades"
+
+
+if __name__ == "__main__":
+    main()
+
+

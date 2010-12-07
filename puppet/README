@@ -1,0 +1,36 @@
+Check_MK Plugin to check whether the puppet agent was run or is disabled.
+
+    This plugin makes use of and distributes the puppetstatus scripts
+    written by tmz[1].
+
+        http://people.fedoraproject.org/~tmz/scripts/puppetstatus/puppetstatus
+
+    The check will return:
+    
+     OK       - Puppet agent was last run within the specified timeframe and
+                is not disabled.
+
+     WARNING  - The agent wasn't run in N seconds but within the WARNING time range,
+                or the agent is disabled (will also put the specified resons to the
+                output).
+
+     CRITICAL - The agent wasn't run in N seconds and reached the CRITICAL time range.
+    
+    The script was tested on the following Debian versions: Lenny, Squeeze
+    
+    Any feedback welcome, DM to sts[at]ono[dot]at. I'm also reading the english
+    check_mk ML: checkmk-en@lists.mathias-kettner.de
+
+
+// INSTALLATION INSTRUCTIONS
+
+    On your Check_MK clients:
+    
+        Copy plugins/puppet to your clients into /usr/lib/check_mk_agent/plugins/puppet
+        and make executeable.
+        Copy bin/puppetstatus.py to /usr/local/bin/puppetstatus and make executeable.
+        Copy lib/puppetstatus.py into your python path.
+    
+    On your Nagios Server:
+    
+        Copy checks/puppet to your server into /usr/local/share/check_mk/scripts/puppet

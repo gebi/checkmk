@@ -1,0 +1,42 @@
+Check_MK Plugin to check for the current state of your Bacula backup server.
+
+    REQUIREMENTS
+     * Debian [inventory based on installed package, easy to extend]
+     * Bacula with Postgresql Backend
+
+    This plugin will define four new checks for Bacula hosts:
+
+        * bacula.errorvols
+
+          Checks the state of available backup volumes and will report critical,
+          if errounos volumes are found. In case of an error, it will as well
+          return the names of these volumes.
+
+          Use the bacula-clear-errvols script to resolve these issues.
+
+        * bacula.freshness
+          Checks whether all clients have an associated backup within the last
+          30 hours.
+
+        * bacula.fullbackups
+          Checks whether all clients have an associated full-backup.
+
+        * bacula.fullbackupspool
+          Checks whether any volumes used for full-backups come from a full-backup pool.
+    
+
+    The script was tested on the following Debian versions: Squeeze
+    
+    Any feedback welcome, DM to sts[at]ono[dot]at. I'm also reading the english
+    check_mk ML: checkmk-en@lists.mathias-kettner.de
+
+// INSTALLATION INSTRUCTIONS
+
+    On your Check_MK clients:
+    
+        Copy plugins/bacula to your clients into /usr/lib/check_mk_agent/plugins/apt
+        and make executeable.
+    
+    On your Nagios Server:
+    
+        Copy checks/bacula to your server into /usr/local/share/check_mk/checks/bacula
