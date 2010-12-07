@@ -1,0 +1,28 @@
+Check_MK Plugin to check for upgradeable Debian packages.
+
+    The client plugin will return a list of packages available for upgrade. It
+    will seperate upgradeable packages and security upgrades, so the check
+    can alert with different alerting levels. 
+    
+    The check will return:
+    
+     OK       - No upgrades are available.
+     WARNING  - Only non-security upgrades are available.
+     CRITICAL - Security upgrades are available (might also involve normal upgrades).
+    
+    The script was tested on the following Debian versions: Etch, Lenny, Squeeze
+    
+    Any feedback welcome, DM to sts[at]ono[dot]at. I'm also reading the english
+    check_mk ML: checkmk-en@lists.mathias-kettner.de
+
+
+// INSTALLATION INSTRUCTIONS
+
+    On your Check_MK clients:
+    
+        Install the python-apt package and copy plugins/apt to your
+        clients into /usr/lib/check_mk_agent/plugins/apt
+    
+    On your Nagios Server:
+    
+        Copy checks/apt to your server into /usr/local/share/check_mk/scripts/apt
