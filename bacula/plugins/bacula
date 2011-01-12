@@ -16,7 +16,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# Check_MK for Bacula
+
 
 INTERVAL="30h"
 INSTALLED=0
@@ -31,7 +32,7 @@ status_freshness()
 {
     # Find count(clientid) for clients which weren't backed up within $INTERVAL
     FRESHNESS_SQL="SELECT COUNT(clientid) FROM client WHERE clientid NOT IN
-               (SELECT clientid FROM job WHERE endtime > (NOW() - INTERVAL '$INTERVAL')
+    	       (SELECT clientid FROM job WHERE endtime > (NOW() - INTERVAL '$INTERVAL')
                AND JOBSTATUS = 'T');"
     
     # Find the name of these clients.
@@ -42,13 +43,12 @@ status_freshness()
     count=`echo $FRESHNESS_SQL|$CMD`
 
     if [[ $count == "" ]]; then
-    echo "freshness E 'Unable to read output from query'"
-    return
+	    echo "freshness E 'Unable to read output from query'"
+	    return
     fi
 
     if [[ $count -ne 0 ]]; then
-        DETAIL=`echo $FRESHNESS_DETAIL_SQL|$CMD`
-        echo $FRESHNESS_DETAIL_SQL|$CMD
+        DETAIL=`echo $FRESHNESS_DETAIL_SQL|$CMD|tr '\n' ','`
     fi
 
     echo "freshness $count $INTERVAL '$DETAIL'"
@@ -63,25 +63,25 @@ status_fullbackups()
 {
     # Finds all clients which have no full backup.
     FULLBACKUPS_SQL="SELECT COUNT(clientid) FROM client WHERE clientid NOT IN 
-        (SELECT client.clientid FROM client,job WHERE job.level = 'F' AND 
-        (job.jobstatus='T' OR job.jobstatus='e') AND 
-        job.clientid = client.clientid);"
+		(SELECT client.clientid FROM client,job WHERE job.level = 'F' AND 
+		(job.jobstatus='T' OR job.jobstatus='e') AND 
+		job.clientid = client.clientid);"
     
     # Find the name of these clients.
     FULLBACKUPS_DETAIL_SQL="SELECT name FROM client WHERE clientid NOT IN 
-        (SELECT client.clientid FROM client,job WHERE job.level = 'F' AND 
-        (job.jobstatus='T' OR job.jobstatus='e') AND 
-        job.clientid = client.clientid);"
+		(SELECT client.clientid FROM client,job WHERE job.level = 'F' AND 
+		(job.jobstatus='T' OR job.jobstatus='e') AND 
+		job.clientid = client.clientid);"
 
     count=`echo $FULLBACKUPS_SQL|$CMD`
 
     if [[ $count == "" ]]; then
-    echo "fullbackups E 'Unable to read output from query'"
-    return
+	echo "fullbackups E 'Unable to read output from query'"
+	return
     fi
 
     if [[ $count -ne 0 ]]; then
-        DETAIL=`echo $FULLBACKUPS_DETAIL_SQL|$CMD`
+        DETAIL=`echo $FULLBACKUPS_DETAIL_SQL|$CMD|tr '\n' ','`
     fi
 
     echo "fullbackups $count '$DETAIL'"
@@ -99,8 +99,8 @@ status_fullbackups_pool()
     # Find count(jobid) of all media which is used in Fullbackup jobs
     # which does not belong to the Fullbackup pool.
     FULLBACKUPS_POOL_SQL="SELECT count(DISTINCT j.jobid)
-              FROM job j, jobmedia jm, media m, pool p
-              WHERE j.jobid=jm.jobid 
+			  FROM job j, jobmedia jm, media m, pool p
+			  WHERE j.jobid=jm.jobid 
                               AND jm.mediaid=m.mediaid
                               AND m.poolid=p.poolid
                               AND p.name NOT ilike '%full%'
@@ -110,8 +110,8 @@ status_fullbackups_pool()
 
     # Find the job names
     FULLBACKUPS_POOL_DETAIL_SQL="SELECT DISTINCT j.job
-              FROM job j, jobmedia jm, media m, pool p
-              WHERE j.jobid=jm.jobid 
+			  FROM job j, jobmedia jm, media m, pool p
+			  WHERE j.jobid=jm.jobid 
                               AND jm.mediaid=m.mediaid
                               AND m.poolid=p.poolid
                               AND p.name NOT ilike '%full%'
@@ -122,12 +122,12 @@ status_fullbackups_pool()
     count=`echo $FULLBACKUPS_POOL_SQL|$CMD`
 
     if [[ $count == "" ]]; then
-    echo "fullbackupspool E 'Unable to read output from query'"
-    return
+	echo "fullbackupspool E 'Unable to read output from query'"
+	return
     fi
 
     if [[ $count -ne 0 ]] ; then
-        DETAIL=`echo $FULLBACKUPS_POOL_DETAIL_SQL|$CMD`
+        DETAIL=`echo $FULLBACKUPS_POOL_DETAIL_SQL|$CMD|tr '\n' ','`
     fi
 
     echo "fullbackupspool $count '$DETAIL'"
@@ -157,18 +157,18 @@ status_errounos_volumes()
     count=`echo $ERRVOLS_SQL|$CMD`
 
     if [[ $count == "" ]]; then
-    echo "errorvols E 'Unable to read output from query'"
-    return
+	echo "errorvols E 'Unable to read output from query'"
+	return
     fi
 
     if [[ $count -ne 0 ]] ; then
-        DETAIL=`echo $ERRVOLS_DETAIL_SQL|$CMD|tr '\n' ';'`
+        DETAIL=`echo $ERRVOLS_DETAIL_SQL|$CMD|tr '\n' ','`
     fi
 
     echo "errorvols $count ${DETAIL}"
 
 }
-    
+	
 check_installed() {
     dpkg -s bacula-director-pgsql &>/dev/null
     RC=$?
