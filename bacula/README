@@ -34,7 +34,7 @@ Check_MK Plugin to check for the current state of your Bacula backup server.
 
     On your Check_MK clients:
     
-        Copy plugins/bacula to your clients into /usr/lib/check_mk_agent/plugins/apt
+        Copy plugins/bacula to your clients into /usr/lib/check_mk_agent/plugins/bacula
         and make executeable.
     
     On your Nagios Server:
