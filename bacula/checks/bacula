@@ -69,7 +69,7 @@ def check_bacula_fullbackupspool(item, params, info):
     if int(items['fullbackupspool'][1]) == 0:
         return (0, "OK: No full-backups using the wrong pool.")
     else:
-        return (2, "CRITICAL: %s clients currently don't have a full-backup: %s" % ( items['fullbackups'][1], items['fullbackups'][2] )  )
+        return (2, "CRITICAL: %s backups using the wrong pool: %s" % ( items['fullbackupspool'][1], items['fullbackupspool'][2] )  )
 
 def check_bacula_errorvols(item, params, info):
     items = info_to_dict(info)
