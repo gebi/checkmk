@@ -39,7 +39,7 @@ class AptCache(apt.Cache):
     update_interval = 3600
 
     # file to check against
-    update_last_file = "/var/cache/apt/pkgcache.bin"
+    update_last_file = "/var/tmp/checkmk_apt_timestamp"
 
     def __init__(self):
         apt.Cache.__init__(self)
@@ -48,12 +48,15 @@ class AptCache(apt.Cache):
     # automatically update the apt cache once a hour
     def update_cache(self):
         delta = self.last_cache_update(self.update_last_file)
-        if delta and delta.seconds > self.update_interval:
+        if not delta or delta.seconds > self.update_interval:
+            print "Updating now"
             self.update()
             self.open(None)
+            # update the timestamp
+            self.update_timestamp(self.update_last_file)
 
     def last_cache_update(self, file):
-        # if the file to check against doesn't exist, return
+        # return false, if we don't have the file yet
         if not os.path.isfile(file):
             return False
 
@@ -62,6 +65,11 @@ class AptCache(apt.Cache):
         delta   = now - mtime
 
         return delta
+
+    def update_timestamp(self, file):
+        print "update_timestamp"
+        open(file, 'w').close()
+        return True
 
 
 def get_upgradeable():
@@ -93,17 +101,15 @@ def main():
     print "<<<apt>>>"
 
     if len(upgrades) > 0:
-        print "upgrades \"%s\"" % ",".join(upgrades)
+	print "upgrades \"%s\"" % ",".join(upgrades)
     else:
-        print "upgrades"
+	print "upgrades"
 
     if len(secupgrades) > 0:
-        print "secupgrades \"%s\"" % ",".join(secupgrades)
+	print "secupgrades \"%s\"" % ",".join(secupgrades)
     else:
-        print "secupgrades"
+	print "secupgrades"
 
 
 if __name__ == "__main__":
     main()
-
-
