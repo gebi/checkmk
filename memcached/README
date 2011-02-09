@@ -1,0 +1,39 @@
+Check_MK Plugin to check a memcached instance.
+
+    The client plugin will return the stats of a given memcached instance.
+    
+    The check will test two different ratios: 
+        * memcached.hits the percentage of cache hits and.
+        * memcached.size the percentage of usaged memory.
+    
+    The script was tested on the following Debian versions: Squeeze
+    
+    Any feedback welcome, DM to sts[at]ono[dot]at. I'm also reading the english
+    check_mk ML: checkmk-en@lists.mathias-kettner.de
+
+
+// INSTALLATION INSTRUCTIONS
+
+    On your Check_MK clients:
+    
+        Install the following debian packages:
+            * python-simplejson
+            * python-pylibmc
+        
+        Copy plugins/memcached to your clients into /usr/lib/check_mk_agent/plugins/
+    
+    On your Nagios Server:
+    
+        Install the pyton-simplejson package and copy checks/memcached to your
+        server into /usr/local/share/check_mk/scripts/
+
+// TODO
+
+    * The agent plugin and the check currently only support one memcached server,
+      listening on the following address: 127.0.0.1:11211
+      But could be extended, so it's able to detect or can be configured to
+      support more than one instance.
+
+    * Check where a value can be inserted, updated, deleted.
+
+    * Check the time spent, to acomblish the insert, update, delete of a value.

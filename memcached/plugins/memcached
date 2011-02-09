@@ -1,0 +1,19 @@
+#!/usr/bin/python
+
+import pylibmc
+import sys
+import simplejson as json
+
+servers = ['127.0.0.1:11211']
+
+if __name__ == "__main__":
+    print "<<<memcached>>>"
+    for server in servers:
+        try:
+            mc = pylibmc.Client([server])
+        except:
+            e = sys.exc_info()[1]
+            print "%s connection error: %s" % ( server, e)
+        else:
+            stats = mc.get_stats()
+            print json.dumps({server: stats[0][1]})

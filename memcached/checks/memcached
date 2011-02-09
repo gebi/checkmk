@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+#
+# Check_MK Memcached Plugin
+#
+# Copyright 2010, Stefan Schlesinger <sts@ono.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+import simplejson as json
+import pprint
+
+memcached_size_default_values = (80,90)
+memcached_hits_default_values = (40,20)
+
+def json_to_obj(info):
+    str = "".join(info[0])
+    obj = json.loads(str)
+    return obj
+    
+def inventory_memcached(checkname, info):
+    if len(info) > 0:
+        if checkname == "memcached.size":
+            return[(checkname,"","memcached_size_default_values")]
+
+        if checkname == "memcached.hits":
+            return[(checkname,"","memcached_hits_default_values")]
+
+    return []
+
+def check_memcached(item, params, info):
+    warn, crit = params
+    data = json_to_obj(info)
+
+    # currently only supported for localhost
+    localhost = data["127.0.0.1:11211"]
+
+    if(item == "memcached.hits"):
+        r = ratio(localhost["bytes"],localhost["limit_maxbytes"])
+
+        if r > crit:
+            return(2, "Critical - Current memory usage: %d%%" % r)
+        elif r > warn:
+            return(1, "Warning - Current memory usage: %d%%" % r) 
+        else:
+            return(0, "OK - Current memory usage: %d%%" % r)
+
+    if(item == "memcached.size"):
+        h = ratio(localhost["get_hits"],localhost["cmd_get"])
+
+        if h > crit:
+            return(2, "Critical - Current memory usage: %d%%" % h)
+        elif h > warn:
+            return(1, "Warning - Current memory usage: %d%%" % h) 
+        else:
+            return(0, "OK - Current memory usage: %d%%" % h)
+
+
+    return (3, "Undefined check item (%s), please check the memcached plugin source code. :-)" % item)
+
+def ratio(current,maximum):
+    current = int(current)
+    maximum = int(maximum)
+    return current*100/maximum
+
+check_info['memcached.size'] = \
+      (check_memcached, "%s", 0, inventory_memcached)
+
+check_info['memcached.hits'] = \
+      (check_memcached, "%s", 0, inventory_memcached)
