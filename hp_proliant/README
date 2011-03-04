@@ -1,0 +1,27 @@
+Check_MK Plugin to check hardware health of HP Proliant Servers per agent:
+
+    The client plugin will return various stats about server health.
+    
+    The script was tested on the following Debian versions: Squeeze
+    
+    Any feedback welcome, DM to michael[at]mgeb[dot]org. I'm also reading the english
+    check_mk ML: checkmk-en@lists.mathias-kettner.de
+
+
+// INSTALLATION INSTRUCTIONS
+
+    On your Check_MK clients:
+    
+        Install the following debian packages:
+            * cciss-vol-status
+            * hp-health
+        
+        Copy plugins/hp_proliant_agent to your clients into /usr/lib/check_mk_agent/plugins/
+    
+    On your Nagios Server:
+    
+        Copy checks/hp_proliant_agent to your server into /usr/local/share/check_mk/scripts/
+
+// TODO
+
+    * write the serverside check script

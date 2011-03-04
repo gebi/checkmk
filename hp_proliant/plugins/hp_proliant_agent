@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if which hpasmcli >/dev/null; then
+    echo '<<<hp_proliant_agent_temp>>>'
+    hpasmcli -s 'show temp' |grep \^# |tr -s ' '
+    echo '<<<hp_proliant_agent_fans>>>'
+    hpasmcli -s 'show fans' |grep \^# |tr -s ' '
+    echo '<<<hp_proliant_agent_dimm>>>'
+    hpasmcli -s 'show dimm' |grep -v '^$' |sed 1,2d
+    echo '<<<hp_proliant_agent_power>>>'
+    hpasmcli -s 'show powersupply' |grep -v '^$'
+    echo '<<<hp_proliant_agent_server>>>'
+    hpasmcli -s 'show server' |grep -v '^$'
+fi
+
+if which cciss_vol_status >/dev/null; then
+    echo '<<<hp_proliant_agent_raid>>>'
+    cciss_vol_status -p /dev/cciss/c*d0
+fi
